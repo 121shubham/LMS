@@ -17,8 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from lms_app import views
+from lms_app.views import UserListView
 
 urlpatterns = [
     path('signup/', views.api_signup, name='api_signup'),
     path('login/', views.api_login, name='api_login'),
+    path('api/users/', UserListView.as_view(), name='user-list'),
 ]
