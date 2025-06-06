@@ -1,3 +1,5 @@
+#lms_backend/lms_backend/settings.py
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -23,6 +25,7 @@ INSTALLED_APPS = [
     # Third-party apps:
     "corsheaders",
     "rest_framework",
+    'rest_framework_simplejwt',
     "django_filters",
 
     # Local app:

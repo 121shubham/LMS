@@ -1,3 +1,5 @@
+#lms_backend/lms_app/views.py
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
@@ -22,11 +24,14 @@ from .models import (
     Content, Assignment, AssignmentSubmission, Quiz,
     Question, Choice, StudentQuizAttempt, StudentAnswer
 )
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 from .serializers import (
     UserSerializer, ProgramSerializer, EnrollmentSerializer,
     CourseSerializer, ChapterSerializer, ContentSerializer,
     AssignmentSerializer, AssignmentSubmissionSerializer, QuizSerializer,
-    QuestionSerializer, ChoiceSerializer, StudentQuizAttemptSerializer, LeaderboardSerializer
+    QuestionSerializer, ChoiceSerializer, StudentQuizAttemptSerializer, LeaderboardSerializer,CustomTokenObtainPairSerializer
 )
 
 User = get_user_model()
@@ -45,6 +50,13 @@ def get_csrf(request):
     response = HttpResponse("CSRF cookie set")
     response["X-CSRFToken"] = get_token(request)
     return response
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """
+    Uses CustomTokenObtainPairSerializer to enforce that the 'role' sent in the payload
+    matches user.role in the database. If mismatch, returns 400 with {"role": ["Invalid role for this user."]}.
+    """
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 @csrf_exempt
@@ -127,6 +139,10 @@ def api_login(request):
             return JsonResponse({'error': 'Invalid password'}, status=401)
     except CustomUser.DoesNotExist:
         return JsonResponse({'error': 'Invalid username or password'}, status=401)
+    
+
+
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -1,13 +1,13 @@
+#lms_backend/lms_backend/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Simple JWT endpoints:
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+
+from rest_framework_simplejwt.views import TokenRefreshView
+from lms_app.views import CustomTokenObtainPairView
 
 # Legacy session-based endpoints (we’ll keep them around but prefer JWT)
 from lms_app.views import api_signup, api_login
@@ -20,8 +20,10 @@ urlpatterns = [
     path('api/login/', api_login, name='api_login'),
 
     # New JWT endpoints
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    
 
     # All other API routes:
     path('api/', include('lms_app.urls')),

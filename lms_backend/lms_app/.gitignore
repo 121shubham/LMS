@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+!venv/bin/activate
+!venv/Scripts/activate
+!venv/pyvenv.cfg
+.env
+
+# Django
+*.sqlite3
+media/
+static_collected/
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db

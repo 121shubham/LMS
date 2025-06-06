@@ -1,3 +1,6 @@
+#lms_backend/lms_app/serializers.py
+
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import (
@@ -5,6 +8,8 @@ from .models import (
     Content, Assignment, AssignmentSubmission, Quiz,
     Question, Choice, StudentQuizAttempt, StudentAnswer
 )
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -18,6 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
             'date_joined', 'last_login'
         ]
         read_only_fields = ['date_joined', 'last_login']
+
 
 
 # ───── Program Serializer ───────────────────────────────────────────────────
@@ -181,3 +187,35 @@ class StudentQuizAttemptSerializer(serializers.ModelSerializer):
 class LeaderboardSerializer(serializers.Serializer):
     username = serializers.CharField()
     total_score = serializers.IntegerField()
+
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+     """
+     Extends Simple JWT’s TokenObtainPairSerializer to also require and validate 'role',
+     and to prevent login if user.is_approved is False.
+     """
+     role = serializers.CharField(write_only=True)
+
+     def validate(self, attrs):
+         # 1) Extract the 'role' from the incoming data
+         role_sent = self.initial_data.get("role", "").strip().lower()
+         if not role_sent:
+             raise serializers.ValidationError({"role": "This field is required."})
+
+         # 2) Run the base username/password check
+         data = super().validate(attrs)
+         user = self.user  # set by super().validate()
+
+         # 3) Prevent login if the user has not been approved yet
+         if not getattr(user, "is_approved", False):
+             raise serializers.ValidationError({"detail": "Account is not approved yet."})
+
+         # 4) Compare client‐sent role vs. actual user.role
+         actual_role = getattr(user, "role", "").strip().lower()
+         if role_sent != actual_role:
+             raise serializers.ValidationError({"role": "Invalid role for this user."})
+
+         # 5) If everything is okay, include 'role' in the response
+         data["role"] = actual_role
+         return data
